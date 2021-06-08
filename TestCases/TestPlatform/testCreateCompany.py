@@ -1,4 +1,4 @@
-from Apis.PlatformBaseApi.CreateCompany import *
+from Apis.PlatformBaseApi.CompanyApi import *
 import allure
 import random
 from support import assert_true

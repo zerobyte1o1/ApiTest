@@ -1,6 +1,6 @@
 allure-pytest==2.9.42
 allure-python-commons==2.9.42
-apitestbasic @ file:///Users/linhao/PycharmProjects/pythonProject/ApiTest/apitestbasic-0.1.1-py3-none-any.whl
+apitestbasic @ file:///Users/liufangjing/PycharmProjects/ApiTest/apitestbasic-0.1.1-py3-none-any.whl
 attrs==21.2.0
 beeprint==2.4.10
 Faker==8.4.0

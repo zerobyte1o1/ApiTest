@@ -32,7 +32,7 @@ class TestCreateCompany:
     @allure.title("创建企业")
     def test6(self, admin):
         c = CreateCompany(admin)
-        c.create_company(name="接口测试1", phone="15774510000",
+        c.create_company(name="接口测试2", phone="15774510000",
                          province="浙江省", city="杭州市", county="萧山区",
                          address="测试")
         assert_true(c.result)

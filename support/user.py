@@ -13,3 +13,6 @@ class User(BaseUser):
     def __init__(self, account, password):
         super(User, self).__init__(self.url, Mutation, {"account": account, "password": password})
         self.info = Me(self).run().result
+
+
+admin = User("admin", "teletraan")

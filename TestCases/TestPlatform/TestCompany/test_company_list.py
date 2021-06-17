@@ -1,10 +1,10 @@
 from Apis.PlatformBaseApi.CompanyApi import *
 import allure
 import random
-from support import assert_true, admin
+from support import assert_true, admin, create_str
 
 
-class TestCreateCompany:
+class TestCompanyList:
 
     @allure.title("查询企业类型和列表")
     def test1(self):
@@ -32,7 +32,8 @@ class TestCreateCompany:
     @allure.title("创建企业")
     def test6(self):
         c = CreateCompany(admin)
-        c.create_company(name="接口测试1", phone="15774510000",
+        company_name = create_str("company")
+        c.create_company(name=company_name, phone="15774510000",
                          province="浙江省", city="杭州市", county="萧山区",
                          address="测试")
         assert_true(c.result)

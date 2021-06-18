@@ -31,6 +31,9 @@ class DepartmentTree(GraphqlApi):
         self.run(filter=DepartmentTreeFilter(company=return_id_input(company_id)))
         return DepartmentTreeObject(**json.loads(self.result.obj))
 
+    def query_my_company(self):
+        return self.query(None)
+
     def search(self, company_id, path):
         tree = self.query(company_id)
         names = path.split(".")

@@ -14,7 +14,7 @@ def filter_result(result: list, name: str, value):
 
 
 def search_result(search_list: list, name: str, value):
-    if isinstance(search_list[0], list):
+    if search_list and isinstance(search_list[0].obj, list):
         new_list = []
         for i in search_list:
             new_list.extend(i)

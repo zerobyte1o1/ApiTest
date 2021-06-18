@@ -110,7 +110,8 @@ class TreeObjectList(object):
                     return result
             except NoSubFieldFindError:
                 pass
-        raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
+        return False
+        # raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
 
     def select_path(self, field_name, name):
         """如果接口返回的field_name中名称有和name一样的，那么返回从根节点到这个节点的所有路径节点"""
@@ -118,8 +119,11 @@ class TreeObjectList(object):
             try:
                 path = tree.select_path(field_name, name)
                 if path:
+                    if not isinstance(path,list):
+                        path = []
                     path.insert(0, tree)
                     return path
             except NoSubFieldFindError:
                 pass
-        raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
+        return False
+        # raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))

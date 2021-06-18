@@ -1,5 +1,5 @@
 from apitestbasic import GraphqlApi, GraphqlApiExtension
-from support import search_result, QueryAllApi, random_choice, create_str
+from support import search_result, QueryAllApi, random_choice, create_str, return_id_input
 
 from Schema import Query, Mutation, CompanyAppsFilter, MyAppListFilter, AddCompanyAppsInput, companyExistsFilter, \
     CompanyAdminUsersFilter, ResetPasswordInput, DeleteCompanyAdminUsersInput
@@ -8,7 +8,7 @@ from Schema import Query, Mutation, CompanyAppsFilter, MyAppListFilter, AddCompa
 class TypeCompanies(QueryAllApi):
     api = Query.type_companies
 
-    def search_company_by_id(self, type_id, name):
+    def search_company_by_type(self, type_id, name):
         self.run()
         type_results = search_result(self.result.data, "type.id", type_id)
         return search_result(type_results.companies, "name", name)
@@ -52,7 +52,7 @@ class MyAppList(GraphqlApiExtension.GraphqlQueryListAPi):
 
     def query_omit_apps(self, company_id):
         """超级管理员查询企业未订阅的app列表"""
-        return self.query(filter=MyAppListFilter(company=company_id))
+        return self.query(filter=MyAppListFilter(company=return_id_input(company_id)))
 
     def query_my_apps(self):
         """企业管理员调用查询自己公司有的app"""
@@ -87,13 +87,15 @@ class CreateCompany(GraphqlApiExtension.GraphqlOperationAPi):
         county = random_choice(Counties(self.user).counties(city.id).result)
         return province.name, city.name, county.name
 
-    def normal_request(self):
+    def normal_request(self, name=None):
         input_ = self.variables.input
-        input_.stay("name", "type", "province", "city", "county")
+        # input_.stay("name", "type", "province", "city", "county")
+        if name:
+            input_.name = name
         input_.type.id = self.random_type
         input_.province, input_.city, input_.county = self.random_address
         self.run()
-        return TypeCompanies(self.user).search_company_by_id(input_.type.id, input_.name)
+        return TypeCompanies(self.user).search_company_by_type(input_.type.id, input_.name)
 
 
 class DeleteCompanies(GraphqlApiExtension.GraphqlOperationAPi):
@@ -163,5 +165,4 @@ class DeleteCompanyAdminUsers(GraphqlApi):
 if __name__ == '__main__':
     from support import admin
 
-    test = CreateCompanyAdminUser(admin)
-    print(test.random_company)
+    print(TypeCompanies(admin).search_company_by_name("接口测试1"))

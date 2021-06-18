@@ -119,11 +119,11 @@ class CompanyAdminUsers(GraphqlApiExtension.GraphqlQueryListAPi):
     api = Query.company_admin_users
 
     def query_company_admin(self, company_id):
-        return self.query(filter=CompanyAdminUsersFilter(company_ids=[company_id]))
+        return self.query_full(filter=CompanyAdminUsersFilter(company_ids=[company_id]))
 
     def search_admin(self, company_id, account):
         self.query_company_admin(company_id)
-        return search_result(self.result_.data, "account", account)
+        return search_result(self.result.data, "account", account)
 
 
 class CreateCompanyAdminUser(GraphqlApiExtension.GraphqlOperationAPi):
@@ -133,13 +133,13 @@ class CreateCompanyAdminUser(GraphqlApiExtension.GraphqlOperationAPi):
     def random_company(self):
         return random_choice(TypeCompanies(self.user).run().result_.data[0].companies).id
 
-    def normal_request(self):
-        account = create_str("account")
-        company_id = self.random_company
+    def normal_request(self, company_id=None):
+        account = create_str("account_")
+        if not company_id:
+            company_id = self.random_company
         input_ = self.variables.input
         input_.account = account
         input_.company.id = company_id
-        input_.name = account
         self.run()
         return CompanyAdminUsers(self.user).search_admin(company_id, account)
 
@@ -165,4 +165,4 @@ class DeleteCompanyAdminUsers(GraphqlApi):
 if __name__ == '__main__':
     from support import admin
 
-    print(TypeCompanies(admin).search_company_by_name("接口测试1"))
+    print(UpdateCompanyAdminUser(admin).variables)

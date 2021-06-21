@@ -23,18 +23,33 @@ class TreeObject(object, metaclass=TreeType):
     parent_field = "parent_id"
     child_field = "children"
 
+    def __init__(self, **kwargs):
+        pass
+
     def __repr__(self):
         return "type" + str(self.__dict__)
 
     def select(self, field_name, name):
+        """如果本节点或者一层子节点的field_name中名称有和name一样的，那么返回这个节点"""
+        if getattr(self, field_name) == name:
+            return self
+        else:
+            for child in getattr(self, "children", []):
+                if getattr(child, field_name) == name:
+                    return child
+            else:
+                raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
+
+    def select_deep(self, field_name, name):
         """如果接口返回的field_name中名称有和name一样的，那么返回这个节点，如果没有查找子节点"""
         if getattr(self, field_name) == name:
             return self
         else:
             for child in getattr(self, "children", []):
                 try:
-                    if child.select(field_name, name):
-                        return child
+                    result = child.select_deep(field_name, name)
+                    if result:
+                        return result
                 except NoSubFieldFindError:
                     pass
         raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
@@ -77,14 +92,26 @@ class TreeObjectList(object):
             self.tree_list.append(self.tree_object(**i))
 
     def select(self, field_name, name):
-        """如果接口返回的field_name中名称有和name一样的，那么返回这个节点，如果没有查找子节点"""
         for tree in self.tree_list:
             try:
-                if tree.select(field_name, name):
-                    return tree.select(field_name, name)
+                result = tree.select(field_name, name)
+                if result:
+                    return result
             except NoSubFieldFindError:
                 pass
         raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
+
+    def select_deep(self, field_name, name):
+        """如果接口返回的field_name中名称有和name一样的，那么返回这个节点，如果没有查找子节点"""
+        for tree in self.tree_list:
+            try:
+                result = tree.select_deep(field_name, name)
+                if result:
+                    return result
+            except NoSubFieldFindError:
+                pass
+        return False
+        # raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
 
     def select_path(self, field_name, name):
         """如果接口返回的field_name中名称有和name一样的，那么返回从根节点到这个节点的所有路径节点"""
@@ -92,8 +119,11 @@ class TreeObjectList(object):
             try:
                 path = tree.select_path(field_name, name)
                 if path:
+                    if not isinstance(path,list):
+                        path = []
                     path.insert(0, tree)
                     return path
             except NoSubFieldFindError:
                 pass
-        raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))
+        return False
+        # raise NoSubFieldFindError("no value %s in field %s" % (name, field_name))

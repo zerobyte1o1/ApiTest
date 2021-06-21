@@ -2,8 +2,6 @@ from apitestbasic import GraphqlApi, GraphqlApiExtension
 from Schema import Query, Mutation, PermissionTreeFilterInput, IDInput, CompanyAdminPermissionInput, RoleFilterInput
 from support.common_object.tree_object import TreeObjectList, TreeObject
 from support import return_id_input, admin
-# from .CompanyApi import TypeCompanies
-from Apis.PlatformBaseApi.CompanyApi import TypeCompanies
 import json
 
 
@@ -79,6 +77,7 @@ class CompanyPermissionOperator:
 
     def query(self):
         return self.role_list.query(self.info.id)
+
 
 if __name__ == '__main__':
     tree_ = PermissionTree(admin).query_company_permissions(61)

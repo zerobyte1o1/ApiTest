@@ -4,14 +4,15 @@ from Schema import Query, Mutation,RoleFilterInput
 
 class RoleList(GraphqlApiExtension.GraphqlQueryListAPi):
     api=Query.role_list
-
+    def rolelist(self,search):
+        return self.query(filter=RoleFilterInput(search=search))
 
 class DeleRole(GraphqlApi):
     api=Mutation.delete_role
     def delerole(self, province_id):
         return self.run(province_id=province_id)
 
-class createRole(GraphqlApi):
+class createRole(GraphqlApiExtension.GraphqlOperationAPi):
     api=Mutation.create_role
     def create_role(self, **kwargs):
         params = self.new_var()
@@ -26,4 +27,4 @@ class createRole(GraphqlApi):
 class deleteRole(GraphqlApi):
     api=Mutation.delete_role
     def deletrole(self,id):
-        return self.run(id)
+        return self.run(id=id)

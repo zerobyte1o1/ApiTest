@@ -6,7 +6,7 @@ from support import assert_true
 class TestDeleteRole:
     allure.title("删除角色")
     def test1(self,admin):
-        assert deleteRole(admin).deletrole(185).result
+        assert_true(deleteRole(admin).deletrole(["232"]).result)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from support import assert_true
 class TestSelectRole:
     @allure.title("查询全部角色")
     def test1(self,admin):
-        assert RoleList(admin).run().result
+        assert RoleList(admin).rolelist("36").run()
 
 
 

@@ -52,7 +52,7 @@ class UpdateRole(GraphqlApiExtension.GraphqlUpdateAPi):
         input_.desc=kwargs['desc']
         input_.permissions=[{'permission':{'id':kwargs['permissionid']}}]
         input_.name=kwargs['name']
-
+        return self.run()
 
 
 if __name__ == '__main__':
@@ -64,5 +64,5 @@ if __name__ == '__main__':
     # print(a)
     a=UpdateRole(admin)
     a.update_role(companyid=36,id=188,desc='备注',name="角色3",permissionid="811")
-    a.run()
+
     print(a.result)

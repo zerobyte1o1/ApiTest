@@ -1,0 +1,15 @@
+-
+  permission_name:
+    - 用户管理
+  apis:
+    - api: $(CompanyAdminUserOperator)
+      method_name: create_user
+      args:
+        - $([role_id])
+      kwargs:
+        account: test_0_1_1
+
+
+    - api: $(UpdateUser)
+      method_name: create_user
+      variables_changes:

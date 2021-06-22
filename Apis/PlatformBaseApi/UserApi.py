@@ -1,5 +1,5 @@
 from apitestbasic import GraphqlApi, GraphqlApiExtension
-from Schema import Query, Mutation, UserListFilter
+from Schema import Query, Mutation, UserListFilter, DeleteUsersInput
 from support import admin, return_id_input
 
 
@@ -43,18 +43,16 @@ class UpdateUser(GraphqlApiExtension.GraphqlUpdateAPi):
     api = Mutation.update_user
 
     def update_user(self, **kwargs):
-        print(self.variables)
-        params = self.new_var()
-        input_ = params.input
-        input_.account = kwargs['account']
-        input_.id = kwargs['id']
-        input_.department.id = kwargs['departmentid']
-        input_.desc = kwargs['desc']
-        input_.email = kwargs['email']
-        input_.isActive = kwargs['isActive']
-        input_.name = kwargs['name']
-        input_.phone = kwargs['phone']
-        input_.role = kwargs['role']
+        self.variables.input.account = kwargs['account']
+        self.variables.input.id = kwargs['id']
+        self.variables.input.department.id = kwargs['departmentid']
+        self.variables.input.desc = kwargs['desc']
+        self.variables.input.email = kwargs['email']
+        self.variables.input.isActive = kwargs['isActive']
+        self.variables.input.name = kwargs['name']
+        self.variables.input.phone = kwargs['phone']
+        self.variables.input.role = kwargs['role']
+        print(self.variables.input)
         return self.run()
 
 
@@ -68,12 +66,22 @@ class ResetPassword(GraphqlApiExtension.GraphqlOperationAPi):
         return self.run()
 
 
+# 删除用户
+class DeleteUsers(GraphqlApi):
+    api = Mutation.delete_users
+
+    def delete_users(self, id):
+        return self.run(input=DeleteUsersInput(ids=[id]))
+
+
 if __name__ == '__main__':
-    a = CreateUser(admin).create_user(account='test_user8', companyid='36', departmentid='108',
-                                      desc='备注', email='254566451@qq.com', isActive="true",
-                                      name='testname2', phone='13457685948', role=[{'id': '188'}]
-                                      )
-    print(a)
+    # a = CreateUser(admin).create_user(account='test_user12', companyid='36', departmentid='108',
+    #                                   desc='备注', email='254566451@qq.com', isActive="true",
+    #                                   name='testname2', phone='13457685948', role=[{'id': '188'}]
+    #                                   )
+    # print(a)
     # a = ResetPassword(admin)
     # a.reset_password(userIDs="63f7bab1-643c-4016-8eeb-cdafd278db20", scenario="NORMAL_USER")
     # print(a.result)
+    a = DeleteUsers(admin).delete_users("3b4591ac-cf2f-4b4a-8682-8d5af434b1da").result
+    print(a)

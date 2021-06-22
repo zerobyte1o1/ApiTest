@@ -24,24 +24,24 @@ class TestCompanyList:
     @allure.story("企业列表")
     @allure.title("查询省份")
     def test2(self):
-        assert len(Provinces(admin).run().result.data) == 30
+        assert len(Provinces(admin).run().result) == 31
 
     @allure.story("企业列表")
     @allure.title("查询市")
     def test3(self):
         province_id = "110000000000"  # 北京市
-        assert Cities(admin).cities(province_id).result.data[0].name == "市辖区"
+        assert Cities(admin).cities(province_id).result[0].name == "市辖区"
 
     @allure.story("企业列表")
     @allure.title("查询区")
     def test4(self):
         city_id = "110100000000"
-        assert len(Counties(admin).counties(city_id).result.data) == 15
+        assert len(Counties(admin).counties(city_id).result) == 16
 
     @allure.story("企业列表")
     @allure.title("查询企业类型列表")
     def test5(self):
-        assert len(CompanyTypeList(admin).run().result) == 9
+        assert len(CompanyTypeList(admin).run().result.data) == 9
 
     @allure.story("企业列表")
     @allure.title("创建企业")
@@ -108,4 +108,4 @@ class TestCompanyList:
 if __name__ == '__main__':
     from support import run_certain
 
-    run_certain(__file__, "TestCompanyList", "test9")
+    run_certain(__file__)

@@ -1,17 +1,18 @@
 import json
+
 from apitestbasic import GraphqlApi, GraphqlApiExtension
 from support import return_id_input
 from support.common_object.tree_object import TreeObject
 
 from Schema import Query, Mutation, DepartmentTreeFilter, CreateDepartmentInput, DepartmentNameSameAsSiblingsFilter, \
-    UpdateDepartmentInput, DeleteDepartmentsInput
+    UpdateDepartmentInput
 
 
 class Company(GraphqlApi):
     api = Query.company
 
     def query(self, company_id):
-        return self.run(id=company_id)
+        return self.run(id=company_id).result
 
 
 class UpdateCompany(GraphqlApiExtension.GraphqlOperationAPi):
@@ -54,13 +55,15 @@ class DepartmentNameSameAsSiblings(GraphqlApi):
     api = Query.department_name_same_as_siblings
 
     def _query(self, **kwargs):
-        return self.run(input=DepartmentNameSameAsSiblingsFilter(**kwargs))
+        if not kwargs.get("name"):
+            kwargs["name"] = "随便写sss"
+        return self.run(filter=DepartmentNameSameAsSiblingsFilter(**kwargs))
 
-    def query_create(self, parent_node, name):
+    def query_create(self, parent_node, name=None):
         """新建时候用"""
         return self._query(name=name, parent=return_id_input(parent_node.id))
 
-    def query_update(self, node, parent_node, name):
+    def query_update(self, node, parent_node, name=None):
         return self._query(id=node.id, name=name, parent=return_id_input(parent_node.id))
 
 
@@ -70,15 +73,19 @@ class UpdateDepartment(GraphqlApi):
     def update_name(self, node, name):
         return self.run(input=UpdateDepartmentInput(id=node.id, name=name))
 
-    def update_position(self, node, parent_node):
-        return self.run(input=UpdateDepartmentInput(id=node.id, parent=return_id_input(parent_node.id)))
+    def update_position(self, node, parent_node, name):
+        return self.run(input=UpdateDepartmentInput(id=node.id, parent=return_id_input(parent_node.id), name=name))
 
 
 class DeleteDepartment(GraphqlApi):
     api = Mutation.delete_department
 
     def delete(self, node):
-        return self.run(input=DeleteDepartmentsInput(ids=[node.id]))
+        return self.run(id=node.id)
+
+
+class CreateUser(GraphqlApiExtension.GraphqlOperationAPi):
+    api = Mutation.create_user
 
 
 class DepartmentOperator:

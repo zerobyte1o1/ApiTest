@@ -20,20 +20,22 @@ def go_allure(is_clear=False):
         os.mkdir(log_path)
 
 
-def run(file_name):
+def run(file_name, is_clear=False):
+    if is_clear:
+        go_allure(True)
     pro_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     xml_path = pro_dir + "/output/report/xml/"
     pytest.main(
-        ['-s', file_name, '--alluredir', xml_path])  # 正式 "--reruns","2"
+        ['-vs', file_name, '--alluredir', xml_path])  # 正式 "--reruns","2"
     go_allure()
 
 
-def run_certain(file_name, class_name=None, function_name=None):
+def run_certain(file_name, class_name=None, function_name=None, is_clear=False):
     if class_name:
         file_name = "::".join([file_name, class_name])
     if function_name:
         file_name = "::".join([file_name, function_name])
-    run(file_name)
+    run(file_name, is_clear=is_clear)
 
 
 def record(body, title: str = ""):

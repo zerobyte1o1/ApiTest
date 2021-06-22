@@ -3,7 +3,7 @@ from Apis.PlatformBaseApi.PermissionsApi import *
 from functools import partial
 import allure
 from support import admin, create_str, AssertObj, AssertJsonpath, run_certain, AssertSearch, \
-    filter_result, User, except_assert_error
+    filter_result, User
 import pytest
 
 
@@ -100,11 +100,8 @@ class TestCompanyAccount:
             d.delete(user.id)
             AssertObj.assert_true(d.result)
         with allure.step("用户无法登陆"):
-            @except_assert_error(Exception)
-            def login():
+            with pytest.raises(Exception) as e:
                 User(user.account, c.result.obj)
-
-            login()
 
 
 if __name__ == '__main__':

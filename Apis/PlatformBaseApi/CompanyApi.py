@@ -17,6 +17,10 @@ class TypeCompanies(QueryAllApi):
         self.run()
         return search_result(self.result.data.companies, "name", name)
 
+    def search_company_by_id(self, id_):
+        self.run()
+        return search_result(self.result.data.companies, "id", id_)
+
 
 class Provinces(GraphqlApi):
     api = Query.provinces

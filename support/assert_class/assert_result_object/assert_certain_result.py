@@ -1,4 +1,9 @@
 from jsonpath import jsonpath
+import pytest
+
+
+def assume():
+    return
 
 
 class AssertJsonpath:
@@ -13,7 +18,7 @@ class AssertJsonpath:
             value2 = jsonpath(variables.obj, json_path2)
         else:
             value2 = jsonpath(data, json_path1)
-        assert value1 == value2
+        pytest.assume(value1 == value2)
 
     @classmethod
     def assert_jsonpath_results(cls, variables, data, *args):
@@ -28,18 +33,18 @@ class AssertJsonpath:
     def assert_no_error(cls, api):
         """校验结果中有错误"""
         regex = '$..errors'
-        assert not jsonpath(api.data, regex)
+        pytest.assume(not jsonpath(api.data, regex))
 
     @classmethod
     def assert_has_error(cls, api):
         """校验结果中没有错误"""
         regex = '$..errors'
-        assert jsonpath(api.data, regex)
+        pytest.assume(jsonpath(api.data, regex))
 
     @classmethod
     def assert_result(cls, api, json_path, value):
         result = jsonpath(api.data, json_path)
-        assert result == value
+        pytest.assume(result == value)
 
 
 class AssertObj:
@@ -52,27 +57,30 @@ class AssertObj:
 
     @classmethod
     def assert_result(cls, variables, obj, path):
-        assert cls.get_path(variables, path) == cls.get_path(obj, path)
+        if isinstance(path, list) or isinstance(path, tuple):
+            pytest.assume(cls.get_path(variables, path[0]) == cls.get_path(obj, path[1]))
+        else:
+            pytest.assume(cls.get_path(variables, path) == cls.get_path(obj, path))
 
     @classmethod
     def assert_results(cls, variables, obj, *args):
         for path in args:
-            assert cls.get_path(variables, path) == cls.get_path(obj, path)
+            cls.assert_result(variables, obj, path)
 
     @classmethod
     def assert_true(cls, result):
-        assert result.obj is True
+        pytest.assume(result.obj is True)
 
     @classmethod
     def assert_false(cls, result):
-        assert result.obj is False
+        pytest.assume(result.obj is False)
 
 
 class AssertSearch:
 
     @classmethod
     def assert_search_result(cls, method, name):
-        assert method(name)
+        pytest.assume(method(name))
 
     @classmethod
     def assert_search_results(cls, method, *name):
@@ -81,7 +89,7 @@ class AssertSearch:
 
     @classmethod
     def assert_not_search_result(cls, method, name):
-        assert not method(name)
+        pytest.assume(not method(name))
 
     @classmethod
     def assert_not_search_results(cls, method, *name):
@@ -91,7 +99,7 @@ class AssertSearch:
     @classmethod
     def assert_list_contains(cls, a, b):
         for i in b:
-            assert i in a
+            pytest.assume(i in a)
 
     @classmethod
     def assert_list_equal(cls, a, b):

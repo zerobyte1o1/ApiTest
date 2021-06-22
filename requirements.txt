@@ -1,7 +1,7 @@
 allure-pytest==2.9.42
 allure-python-commons==2.9.42
 antlr4-python3-runtime==4.7.2
-apitestbasic==0.1.5
+apitestbasic==0.1.6
 attrs==21.2.0
 beeprint==2.4.10
 Faker==8.4.0
@@ -14,6 +14,7 @@ pluggy==0.13.1
 py==1.10.0
 pyparsing==2.4.7
 pytest==6.2.4
+pytest-assume==2.4.2
 pytest-ordering==0.6
 python-dateutil==2.8.1
 python-utils==2.5.6

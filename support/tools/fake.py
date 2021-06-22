@@ -5,7 +5,7 @@ from faker import Faker
 
 
 def create_str(name):
-    return name + "".join(random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
+    return "_".join(["api_test", name, "".join(random.sample('zyxwvutsrqponmlkjihgfedcba', 5))])
 
 
 class ExtendProvider(BaseProvider):

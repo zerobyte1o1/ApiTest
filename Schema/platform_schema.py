@@ -194,9 +194,9 @@ class MarketSolutionType(sgqlc.types.Enum):
     __choices__ = ('RESEARCH_DESIGN', 'MANUFACTURING', 'MAINTENANCE_SERVICE', 'SAFETY_PRODUCTION', 'SUPPLY_CHAIN_MANAGEMENT', 'WAREHOUSE_AND_LOGISTICS', 'OPERATION_MANAGEMENT', 'QUALITY_CONTROL', 'ENERGY_SAVING')
 
 
-class NotificationCategory(sgqlc.types.Enum):
+class NotificationKind(sgqlc.types.Enum):
     __schema__ = platform_schema
-    __choices__ = ('WARNING', 'ERROR', 'SUCCESS', 'MESSAGE', 'REMINDER')
+    __choices__ = ('APP', 'PLATFORM')
 
 
 class PeriodFrequency(sgqlc.types.Enum):
@@ -242,6 +242,11 @@ class RegisterStatus(sgqlc.types.Enum):
 class RelationType(sgqlc.types.Enum):
     __schema__ = platform_schema
     __choices__ = ('ONE_TO_ONE', 'ONE_TO_MANY')
+
+
+class ResetPasswordScenario(sgqlc.types.Enum):
+    __schema__ = platform_schema
+    __choices__ = ('NORMAL_USER', 'COMPANY_ADMIN', 'PLATFORM_USER')
 
 
 class RoleScope(sgqlc.types.Enum):
@@ -325,6 +330,11 @@ class TrainCourseRoundCategory(sgqlc.types.Enum):
     __choices__ = ('SIGN_RECORD', 'COURSE')
 
 
+class TypeCompaniesScenario(sgqlc.types.Enum):
+    __schema__ = platform_schema
+    __choices__ = ('COMPANY', 'MY_COMPANY', 'ROLE', 'USER', 'SYSTEM_LOG', 'CUSTOMER')
+
+
 class UCCFieldType(sgqlc.types.Enum):
     __schema__ = platform_schema
     __choices__ = ('LABEL', 'TEXT', 'SELECT_BOX', 'DATE', 'RADIO', 'MULTI_RADIO', 'SET')
@@ -338,6 +348,11 @@ class UCCFiledValue(sgqlc.types.Enum):
 class UCCScope(sgqlc.types.Enum):
     __schema__ = platform_schema
     __choices__ = ('COMPANY', 'PLATFORM')
+
+
+class UpdateCompanyScenario(sgqlc.types.Enum):
+    __schema__ = platform_schema
+    __choices__ = ('COMPANY', 'MY_COMPANY')
 
 
 class UpdateThingInspectionStatusAction(sgqlc.types.Enum):
@@ -361,7 +376,7 @@ class UserOrigin(sgqlc.types.Enum):
 
 class UserType(sgqlc.types.Enum):
     __schema__ = platform_schema
-    __choices__ = ('COMPANY_ADMIN', 'COMPANY_NORMAL', 'PLATFORM_ADMIN', 'JIN_HUA_SCHOOL')
+    __choices__ = ('COMPANY_ADMIN', 'COMPANY_NORMAL', 'PLATFORM_ADMIN', 'JIN_HUA_SCHOOL', 'CHANJIAO_SYS_ADMIN', 'CHANJIAO_SCHOOL_ADMIN')
 
 
 class WorkbenchType(sgqlc.types.Enum):
@@ -418,6 +433,12 @@ class AlertRuleFilter(sgqlc.types.Input):
     search = sgqlc.types.Field(String, graphql_name='search')
     thing = sgqlc.types.Field('IDInput', graphql_name='thing')
     thing_type = sgqlc.types.Field('IDInput', graphql_name='thingType')
+
+
+class AppUserListFilter(sgqlc.types.Input):
+    __schema__ = platform_schema
+    __field_names__ = ('app_codes',)
+    app_codes = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='appCodes')
 
 
 class AppsFilter(sgqlc.types.Input):
@@ -1276,12 +1297,6 @@ class DeleteInput(sgqlc.types.Input):
     ids = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(ID))), graphql_name='ids')
 
 
-class DeleteNotficationsInput(sgqlc.types.Input):
-    __schema__ = platform_schema
-    __field_names__ = ('ids',)
-    ids = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(ID)), graphql_name='ids')
-
-
 class DeleteSparePartOutboundsInput(sgqlc.types.Input):
     __schema__ = platform_schema
     __field_names__ = ('ids',)
@@ -1661,6 +1676,20 @@ class MyCompanyAppFilter(sgqlc.types.Input):
     search = sgqlc.types.Field(String, graphql_name='search')
 
 
+class NotificationConfigFilterInput(sgqlc.types.Input):
+    __schema__ = platform_schema
+    __field_names__ = ('source_app', 'kind')
+    source_app = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='sourceApp')
+    kind = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(NotificationKind)), graphql_name='kind')
+
+
+class NotificationFilterInput(sgqlc.types.Input):
+    __schema__ = platform_schema
+    __field_names__ = ('source_app', 'is_read')
+    source_app = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='sourceApp')
+    is_read = sgqlc.types.Field(Boolean, graphql_name='isRead')
+
+
 class PeriodFilter(sgqlc.types.Input):
     __schema__ = platform_schema
     __field_names__ = ('start', 'end')
@@ -1684,11 +1713,12 @@ class PermissionTreeFilterInput(sgqlc.types.Input):
 
 class PlatformUserListFilter(sgqlc.types.Input):
     __schema__ = platform_schema
-    __field_names__ = ('role', 'is_active', 'origin', 'search')
+    __field_names__ = ('role', 'is_active', 'origin', 'search', 'role_code')
     role = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='role')
     is_active = sgqlc.types.Field(Boolean, graphql_name='isActive')
     origin = sgqlc.types.Field(UserOrigin, graphql_name='origin')
     search = sgqlc.types.Field(String, graphql_name='search')
+    role_code = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='roleCode')
 
 
 class PublishBIDashboardInput(sgqlc.types.Input):
@@ -1707,12 +1737,6 @@ class PublishedCourseFilter(sgqlc.types.Input):
     work_type_name = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='workTypeName')
     work_level_name = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='workLevelName')
     status = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(CourseStatus)), graphql_name='status')
-
-
-class ReadNotificationsInput(sgqlc.types.Input):
-    __schema__ = platform_schema
-    __field_names__ = ('ids',)
-    ids = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(ID)), graphql_name='ids')
 
 
 class RecruitJobFilterInput(sgqlc.types.Input):
@@ -2538,6 +2562,16 @@ class UpdateMyPasswordInput(sgqlc.types.Input):
     new_password = sgqlc.types.Field(String, graphql_name='newPassword')
 
 
+class UpdateNotificationConfigInput(sgqlc.types.Input):
+    __schema__ = platform_schema
+    __field_names__ = ('id', 'to_inbox', 'to_email', 'receiver_user', 'receiver_role')
+    id = sgqlc.types.Field(sgqlc.types.non_null(ID), graphql_name='id')
+    to_inbox = sgqlc.types.Field(Boolean, graphql_name='toInbox')
+    to_email = sgqlc.types.Field(Boolean, graphql_name='toEmail')
+    receiver_user = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='receiverUser')
+    receiver_role = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='receiverRole')
+
+
 class UpdateRecruitJobInput(sgqlc.types.Input):
     __schema__ = platform_schema
     __field_names__ = ('id', 'title', 'description', 'requirement', 'recruit_number', 'salary_start', 'salary_end', 'welfare', 'remark', 'expired_at')
@@ -2904,7 +2938,7 @@ class UpdateWorkTypeInput(sgqlc.types.Input):
 
 class UserListFilter(sgqlc.types.Input):
     __schema__ = platform_schema
-    __field_names__ = ('ids', 'company', 'department', 'role', 'is_active', 'search', 'current_only')
+    __field_names__ = ('ids', 'company', 'department', 'role', 'is_active', 'search', 'current_only', 'type')
     ids = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='ids')
     company = sgqlc.types.Field(IDInput, graphql_name='company')
     department = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='department')
@@ -2912,6 +2946,7 @@ class UserListFilter(sgqlc.types.Input):
     is_active = sgqlc.types.Field(Boolean, graphql_name='isActive')
     search = sgqlc.types.Field(String, graphql_name='search')
     current_only = sgqlc.types.Field(Boolean, graphql_name='currentOnly')
+    type = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(UserType)), graphql_name='type')
 
 
 class WordCountLimitInput(sgqlc.types.Input):
@@ -4288,7 +4323,7 @@ class MarketSolutionSummary(sgqlc.types.Type):
 
 class Mutation(sgqlc.types.Type):
     __schema__ = platform_schema
-    __field_names__ = ('create_bifile', 'create_bifiles', 'create_bidatabase', 'update_bidatabase', 'delete_bidatabase', 'delete_bifile_data_source', 'create_bidataset', 'delete_bidataset', 'refresh_bidataset', 'create_bicategory', 'create_bidashboard', 'update_bidashboard', 'publish_bidashboard', 'unpublish_bidashboard', 'delete_bidashboard', 'copy_bidashboard', 'create_recruit_job', 'update_recruit_job', 'audit_recruit_job', 'delete_recruit_job', 'sign_recruit_job', 'audit_recruit_job_sign_record', 'set_company_recruit_brief', 'create_recruit_student', 'update_recruit_student', 'create_train_work_type', 'update_train_work_type', 'delete_train_work_type', 'set_train_work_level', 'sign_train_course', 'create_train_course', 'update_train_course', 'review_sign_up_train_course', 'review_authenticate_train_course', 'close_train_course', 'restart_train_course', 'import_authentication', 'create_social_person', 'update_social_person', 'review_social_person', 'create_company_demand', 'update_company_demand', 'review_company_demand', 'create_chan_jiao_file', 'create_chan_jiao_files', 'create_report', 'update_report', 'notify_energy_consumption', 'create_cockpit_target', 'update_cockpit_target', 'delete_cockpit_target', 'create_thing_input_record', 'update_thing_input_record', 'delete_thing_input_record', 'update_form_struct', 'create_thing_repair', 'create_thing_repairs', 'update_thing_repair', 'update_thing_repair_feedback', 'audit_thing_repair', 'delete_thing_repairs', 'create_eam_file', 'create_eam_files', 'create_thing', 'update_thing', 'delete_things', 'import_things', 'create_spare_part_receipt', 'update_spare_part_receipt', 'delete_spare_part_receipts', 'create_spare_part', 'update_spare_part', 'delete_spare_parts', 'import_spare_parts', 'create_thing_maintenance', 'update_thing_maintenance', 'update_thing_maintenance_feedback', 'update_thing_maintenance_status', 'delete_thing_maintenances', 'create_thing_inspection_rule', 'update_thing_inspection_rule', 'delete_inspection_rules', 'create_thing_inspection', 'update_thing_inspection', 'update_thing_inspection_status', 'update_thing_inspection_feedback', 'delete_thing_inspections', 'create_thing_group', 'update_thing_group', 'delete_thing_group', 'set_users_thing_group', 'set_departments_thing_group', 'set_single_user_thing_groups', 'set_single_department_thing_groups', 'update_department_thing_group', 'update_user_thing_group', 'move_things', 'delete_user_thing_groups', 'delete_department_thing_groups', 'create_spare_part_outbound', 'update_spare_part_outbound', 'audit_spare_part_outbound', 'delete_spare_part_outbounds', 'create_thing_maintenance_rule', 'update_thing_maintenance_rule', 'delete_thing_maintenance_rules', 'create_fault_file', 'create_fault_files', 'create_fault_reason', 'update_fault_issue', 'create_fault_solution', 'update_fault_solution', 'delete_fault_solution', 'create_fault_rule', 'update_fault_rule', 'delete_fault_rule', 'create_directory', 'update_directory', 'delete_directory', 'move_fault_solution', 'create_thing_type', 'update_thing_type', 'delete_thing_types', 'create_source_key', 'update_source_key', 'delete_source_keys', 'create_adapter_key', 'debug_adapter_key', 'update_adapter_key', 'delete_adapter_keys', 'create_cockpit_key', 'update_cockpit_key', 'delete_cockpit_keys', 'create_cockpit_aggregation', 'update_cockpit_aggregation', 'delete_cockpit_aggregations', 'create_thing_status', 'update_thing_status', 'delete_thing_statuses', 'create_energy_group', 'update_energy_group', 'delete_energy_groups', 'update_energy_time_distribution', 'create_thing_organization', 'update_thing_organization', 'delete_thing_organizations', 'create_alert_rule', 'update_alert_rule', 'delete_alert_rules', 'set_alert_config', 'set_things_alert_rules', 'create_company', 'update_company', 'delete_companies', 'update_my_company', 'create_department', 'update_department', 'delete_department', 'create_company_bidatasource', 'delete_company_bidatasource', 'read_notifications', 'delete_notifications', 'create_file', 'create_files', 'create_image', 'create_images', 'create_market_file', 'create_market_files', 'create_role', 'update_role', 'delete_role', 'set_company_admin_permission', 'create_system_issue', 'update_system_issue', 'create_education_issue', 'update_education_issue', 'create_help_issue', 'update_help_issue', 'create_market_solution', 'update_market_solution', 'publish_market_solution', 'delete_market_solution', 'register_user', 'login', 'logout', 'create_company_admin_user', 'update_company_admin_user', 'delete_company_admin_users', 'create_user', 'update_user', 'import_user', 'delete_users', 'update_me', 'update_my_password', 'reset_password', 'restore_user', 'activate_user', 'forbidden_user', 'add_company_apps', 'delete_company_apps', 'visit_app', 'set_quick_access_app', 'set_workbench', 'create_market_app', 'update_market_app', 'publish_market_app', 'delete_market_app', 'create_market_issue', 'update_market_issue', 'set_uccform_structure', 'create_uccdemo_form', 'delete_uccdemo_form', '_dummy')
+    __field_names__ = ('create_bifile', 'create_bifiles', 'create_bidatabase', 'update_bidatabase', 'delete_bidatabase', 'delete_bifile_data_source', 'create_bidataset', 'delete_bidataset', 'refresh_bidataset', 'create_bicategory', 'create_bidashboard', 'update_bidashboard', 'publish_bidashboard', 'unpublish_bidashboard', 'delete_bidashboard', 'copy_bidashboard', 'create_recruit_job', 'update_recruit_job', 'audit_recruit_job', 'delete_recruit_job', 'sign_recruit_job', 'audit_recruit_job_sign_record', 'set_company_recruit_brief', 'create_recruit_student', 'update_recruit_student', 'create_train_work_type', 'update_train_work_type', 'delete_train_work_type', 'set_train_work_level', 'sign_train_course', 'create_train_course', 'update_train_course', 'review_sign_up_train_course', 'review_authenticate_train_course', 'close_train_course', 'restart_train_course', 'import_authentication', 'create_social_person', 'update_social_person', 'review_social_person', 'create_company_demand', 'update_company_demand', 'review_company_demand', 'create_chan_jiao_file', 'create_chan_jiao_files', 'create_report', 'update_report', 'notify_energy_consumption', 'create_cockpit_target', 'update_cockpit_target', 'delete_cockpit_target', 'create_thing_input_record', 'update_thing_input_record', 'delete_thing_input_record', 'update_form_struct', 'create_thing_repair', 'create_thing_repairs', 'update_thing_repair', 'update_thing_repair_feedback', 'audit_thing_repair', 'delete_thing_repairs', 'create_eam_file', 'create_eam_files', 'create_thing', 'update_thing', 'delete_things', 'import_things', 'create_spare_part_receipt', 'update_spare_part_receipt', 'delete_spare_part_receipts', 'create_spare_part', 'update_spare_part', 'delete_spare_parts', 'import_spare_parts', 'create_thing_maintenance', 'update_thing_maintenance', 'update_thing_maintenance_feedback', 'update_thing_maintenance_status', 'delete_thing_maintenances', 'create_thing_inspection_rule', 'update_thing_inspection_rule', 'delete_inspection_rules', 'create_thing_inspection', 'update_thing_inspection', 'update_thing_inspection_status', 'update_thing_inspection_feedback', 'delete_thing_inspections', 'create_thing_group', 'update_thing_group', 'delete_thing_group', 'set_users_thing_group', 'set_departments_thing_group', 'set_single_user_thing_groups', 'set_single_department_thing_groups', 'update_department_thing_group', 'update_user_thing_group', 'move_things', 'delete_user_thing_groups', 'delete_department_thing_groups', 'create_spare_part_outbound', 'update_spare_part_outbound', 'audit_spare_part_outbound', 'delete_spare_part_outbounds', 'create_thing_maintenance_rule', 'update_thing_maintenance_rule', 'delete_thing_maintenance_rules', 'create_fault_file', 'create_fault_files', 'create_fault_reason', 'update_fault_issue', 'create_fault_solution', 'update_fault_solution', 'delete_fault_solution', 'create_fault_rule', 'update_fault_rule', 'delete_fault_rule', 'create_directory', 'update_directory', 'delete_directory', 'move_fault_solution', 'create_thing_type', 'update_thing_type', 'delete_thing_types', 'create_source_key', 'update_source_key', 'delete_source_keys', 'create_adapter_key', 'debug_adapter_key', 'update_adapter_key', 'delete_adapter_keys', 'create_cockpit_key', 'update_cockpit_key', 'delete_cockpit_keys', 'create_cockpit_aggregation', 'update_cockpit_aggregation', 'delete_cockpit_aggregations', 'create_thing_status', 'update_thing_status', 'delete_thing_statuses', 'create_energy_group', 'update_energy_group', 'delete_energy_groups', 'update_energy_time_distribution', 'create_thing_organization', 'update_thing_organization', 'delete_thing_organizations', 'create_alert_rule', 'update_alert_rule', 'delete_alert_rules', 'set_alert_config', 'set_things_alert_rules', 'create_company', 'update_company', 'delete_companies', 'update_my_company', 'create_department', 'update_department', 'delete_department', 'create_company_bidatasource', 'delete_company_bidatasource', 'update_notification_config', 'read_notification', 'read_all_notification', 'create_file', 'create_files', 'create_image', 'create_images', 'create_market_file', 'create_market_files', 'create_role', 'update_role', 'delete_role', 'set_company_admin_permission', 'create_system_issue', 'update_system_issue', 'create_education_issue', 'update_education_issue', 'create_help_issue', 'update_help_issue', 'register_user', 'login', 'logout', 'create_company_admin_user', 'update_company_admin_user', 'delete_company_admin_users', 'create_user', 'update_user', 'import_user', 'delete_users', 'update_me', 'update_my_password', 'reset_password', 'restore_user', 'activate_user', 'forbidden_user', 'create_market_solution', 'update_market_solution', 'publish_market_solution', 'delete_market_solution', 'add_company_apps', 'delete_company_apps', 'visit_app', 'set_quick_access_app', 'set_workbench', 'create_market_app', 'update_market_app', 'publish_market_app', 'delete_market_app', 'create_market_issue', 'update_market_issue', 'set_uccform_structure', 'create_uccdemo_form', 'delete_uccdemo_form', '_dummy')
     create_bifile = sgqlc.types.Field(sgqlc.types.non_null(File), graphql_name='createBIFile', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(sgqlc.types.non_null(CreateBIFileInput), graphql_name='input', default=None)),
 ))
@@ -4905,7 +4940,7 @@ class Mutation(sgqlc.types.Type):
     )
     update_company = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='updateCompany', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(sgqlc.types.non_null(UpdateCompanyInput), graphql_name='input', default=None)),
-        ('perm', sgqlc.types.Arg(String, graphql_name='perm', default=None)),
+        ('scenario', sgqlc.types.Arg(UpdateCompanyScenario, graphql_name='scenario', default=None)),
 ))
     )
     delete_companies = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='deleteCompanies', args=sgqlc.types.ArgDict((
@@ -4936,12 +4971,16 @@ class Mutation(sgqlc.types.Type):
         ('id', sgqlc.types.Arg(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(ID))), graphql_name='id', default=None)),
 ))
     )
-    read_notifications = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='readNotifications', args=sgqlc.types.ArgDict((
-        ('input', sgqlc.types.Arg(sgqlc.types.non_null(ReadNotificationsInput), graphql_name='input', default=None)),
+    update_notification_config = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='updateNotificationConfig', args=sgqlc.types.ArgDict((
+        ('input', sgqlc.types.Arg(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(UpdateNotificationConfigInput))), graphql_name='input', default=None)),
 ))
     )
-    delete_notifications = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='deleteNotifications', args=sgqlc.types.ArgDict((
+    read_notification = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='readNotification', args=sgqlc.types.ArgDict((
         ('id', sgqlc.types.Arg(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(ID))), graphql_name='id', default=None)),
+))
+    )
+    read_all_notification = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='readAllNotification', args=sgqlc.types.ArgDict((
+        ('source_app', sgqlc.types.Arg(sgqlc.types.list_of(sgqlc.types.non_null(IDInput)), graphql_name='sourceApp', default=None)),
 ))
     )
     create_file = sgqlc.types.Field(File, graphql_name='createFile', args=sgqlc.types.ArgDict((
@@ -5008,22 +5047,6 @@ class Mutation(sgqlc.types.Type):
         ('input', sgqlc.types.Arg(UpdateIssueInput, graphql_name='input', default=None)),
 ))
     )
-    create_market_solution = sgqlc.types.Field(sgqlc.types.non_null(ID), graphql_name='createMarketSolution', args=sgqlc.types.ArgDict((
-        ('input', sgqlc.types.Arg(sgqlc.types.non_null(CreateMarketSolutionInput), graphql_name='input', default=None)),
-))
-    )
-    update_market_solution = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='updateMarketSolution', args=sgqlc.types.ArgDict((
-        ('input', sgqlc.types.Arg(sgqlc.types.non_null(UpdateMarketSolutionInput), graphql_name='input', default=None)),
-))
-    )
-    publish_market_solution = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='publishMarketSolution', args=sgqlc.types.ArgDict((
-        ('id', sgqlc.types.Arg(sgqlc.types.non_null(ID), graphql_name='id', default=None)),
-))
-    )
-    delete_market_solution = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='deleteMarketSolution', args=sgqlc.types.ArgDict((
-        ('id', sgqlc.types.Arg(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(ID))), graphql_name='id', default=None)),
-))
-    )
     register_user = sgqlc.types.Field(sgqlc.types.non_null(AuthInfo), graphql_name='registerUser', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(RegisterUserInput, graphql_name='input', default=None)),
 ))
@@ -5071,7 +5094,7 @@ class Mutation(sgqlc.types.Type):
     )
     reset_password = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null('User'))), graphql_name='resetPassword', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(ResetPasswordInput, graphql_name='input', default=None)),
-        ('perm', sgqlc.types.Arg(String, graphql_name='perm', default=None)),
+        ('scenario', sgqlc.types.Arg(ResetPasswordScenario, graphql_name='scenario', default=None)),
 ))
     )
     restore_user = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='restoreUser', args=sgqlc.types.ArgDict((
@@ -5084,6 +5107,22 @@ class Mutation(sgqlc.types.Type):
     )
     forbidden_user = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='forbiddenUser', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(sgqlc.types.non_null(ForbiddenUserInput), graphql_name='input', default=None)),
+))
+    )
+    create_market_solution = sgqlc.types.Field(sgqlc.types.non_null(ID), graphql_name='createMarketSolution', args=sgqlc.types.ArgDict((
+        ('input', sgqlc.types.Arg(sgqlc.types.non_null(CreateMarketSolutionInput), graphql_name='input', default=None)),
+))
+    )
+    update_market_solution = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='updateMarketSolution', args=sgqlc.types.ArgDict((
+        ('input', sgqlc.types.Arg(sgqlc.types.non_null(UpdateMarketSolutionInput), graphql_name='input', default=None)),
+))
+    )
+    publish_market_solution = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='publishMarketSolution', args=sgqlc.types.ArgDict((
+        ('id', sgqlc.types.Arg(sgqlc.types.non_null(ID), graphql_name='id', default=None)),
+))
+    )
+    delete_market_solution = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='deleteMarketSolution', args=sgqlc.types.ArgDict((
+        ('id', sgqlc.types.Arg(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(ID))), graphql_name='id', default=None)),
 ))
     )
     add_company_apps = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='addCompanyApps', args=sgqlc.types.ArgDict((
@@ -5154,22 +5193,52 @@ class MyRecruitSignStatus(sgqlc.types.Type):
 
 class Notification(sgqlc.types.Type):
     __schema__ = platform_schema
-    __field_names__ = ('id', 'user_id', 'type', 'is_read', 'title', 'app', 'time', 'content')
+    __field_names__ = ('id', 'kind', 'source_app', 'content', 'created_at', 'is_read', 'url')
     id = sgqlc.types.Field(sgqlc.types.non_null(ID), graphql_name='id')
-    user_id = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='userID')
-    type = sgqlc.types.Field(sgqlc.types.non_null(NotificationCategory), graphql_name='type')
+    kind = sgqlc.types.Field(sgqlc.types.non_null(NotificationKind), graphql_name='kind')
+    source_app = sgqlc.types.Field(App, graphql_name='sourceApp')
+    content = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='content')
+    created_at = sgqlc.types.Field(sgqlc.types.non_null(Timestamp), graphql_name='createdAt')
     is_read = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='isRead')
-    title = sgqlc.types.Field(String, graphql_name='title')
-    app = sgqlc.types.Field(App, graphql_name='app')
-    time = sgqlc.types.Field(Timestamp, graphql_name='time')
-    content = sgqlc.types.Field(JSONString, graphql_name='content')
+    url = sgqlc.types.Field(String, graphql_name='url')
+
+
+class NotificationConfig(sgqlc.types.Type):
+    __schema__ = platform_schema
+    __field_names__ = ('id', 'name', 'source_app', 'description', 'to_inbox', 'to_email', 'receiver_user', 'receiver_role', 'template', 'kind')
+    id = sgqlc.types.Field(sgqlc.types.non_null(ID), graphql_name='id')
+    name = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='name')
+    source_app = sgqlc.types.Field(App, graphql_name='sourceApp')
+    description = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='description')
+    to_inbox = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='toInbox')
+    to_email = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='toEmail')
+    receiver_user = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null('User'))), graphql_name='receiverUser')
+    receiver_role = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null('Role'))), graphql_name='receiverRole')
+    template = sgqlc.types.Field(sgqlc.types.non_null('NotificationTemplate'), graphql_name='template')
+    kind = sgqlc.types.Field(sgqlc.types.non_null(NotificationKind), graphql_name='kind')
+
+
+class NotificationConfigList(sgqlc.types.Type):
+    __schema__ = platform_schema
+    __field_names__ = ('data', 'total_count')
+    data = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(NotificationConfig))), graphql_name='data')
+    total_count = sgqlc.types.Field(sgqlc.types.non_null(Int), graphql_name='totalCount')
 
 
 class NotificationList(sgqlc.types.Type):
     __schema__ = platform_schema
-    __field_names__ = ('data', 'total_count')
-    data = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(Notification)), graphql_name='data')
+    __field_names__ = ('data', 'total_count', 'read_count', 'unread_count')
+    data = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(Notification))), graphql_name='data')
     total_count = sgqlc.types.Field(sgqlc.types.non_null(Int), graphql_name='totalCount')
+    read_count = sgqlc.types.Field(sgqlc.types.non_null(Int), graphql_name='readCount')
+    unread_count = sgqlc.types.Field(sgqlc.types.non_null(Int), graphql_name='unreadCount')
+
+
+class NotificationTemplate(sgqlc.types.Type):
+    __schema__ = platform_schema
+    __field_names__ = ('inbox', 'email')
+    inbox = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='inbox')
+    email = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='email')
 
 
 class NumberByOrganziation(sgqlc.types.Type):
@@ -5223,7 +5292,7 @@ class Province(sgqlc.types.Type):
 
 class Query(sgqlc.types.Type):
     __schema__ = platform_schema
-    __field_names__ = ('bi_file', 'bi_database_list', 'bi_test_database_uri', 'bi_private_data_source_list', 'bi_file_data_source_list', 'bi_dataset_list', 'bi_column_list', 'bi_excel_info', 'bi_explore', 'bi_category', 'bi_dashboard_list', 'bi_dashboard', 'bi_published_dashboard_list', 'bi_published_dashboard', 'recruit_job_overview', 'recruit_job_list', 'recruit_job', 'recruit_job_sign_record_list', 'recruit_student_list', 'recruit_student', 'recruit_student_overview', 'my_recruit_sign_status', 'company_recruit_brief', 'student_faculty', 'stu_no_exists', 'train_human_resource_list', 'train_work_type_list', 'train_work_level', 'check_work_type_exists', 'train_course_list', 'train_course', 'my_train_sign_course_record_list', 'train_sign_course_record_list', 'check_train_course_exists', 'train_course_round', 'export_chan_jiao_auth_template', 'social_person_list', 'social_person', 'social_person_account_summary', 'company_demand_overview_list', 'company_demand_list', 'company_demand', 'company_demand_summary', 'eprect_production_record', 'eprect_production_record_list', 'eprect_mold_list', 'current_date_data', 'current_shift_data', 'history_status_data', 'history_data', 'range_data', 'history_raw', 'multi_history_raw', 'real_raw', 'history_report', 'history_report_list', 'export_history_report', 'export_thing_energy_detail', 'export_thing_energy_detail_daily', 'real_report', 'total_report', 'thing_report_list', 'export_thing_report_list', 'fee_report_list', 'export_fee_report_list', 'thing_total_report_list', 'export_thing_total_report_list', 'energy_consumption_to_t', 'energy_consumption_trend', 'energy_power_trend', 'energy_consumption_comparison_by_group', 'energy_consumption_comparison_by_type', 'things_overall', 'things_peak_rate_rank', 'things_energy_consumption_rank', 'things_operation_rate_rank', 'things_power_on_rate_rank', 'things_energy_consumption_overall', 'things_energy_consumption_overall_sub', 'area_energy_consumption_overall', 'area_things_overall', 'area_energy_consumption', 'area_peak_power', 'area_production', 'area_redundants', 'area_bottlenecks', 'area_energy_per_product_rank', 'area_energy_consumption_rank', 'area_power_on_rate_rank', 'area_production_distribution', 'area_peak_rate_by_company', 'area_energy_consumption_by_company', 'area_redundant_by_company', 'area_bottleneck_by_company', 'area_production_by_company', 'export_area_production_by_company', 'export_area_redundant_by_company', 'export_area_bottleneck_by_company', 'export_area_peak_rate_by_company', 'export_area_energy_consumption_by_company', 'cockpit_overall', 'cockpit_rate_overall', 'cockpit_rate_list', 'export_cockpit_rate_list', 'cockpit_oee', 'export_cockpit_oee', 'cockpit_operation_rate', 'export_cockpit_operation_rate', 'cockpit_performance_rate', 'export_cockpit_performance_rate', 'cockpit_yield_rate', 'export_cockpit_yield_rate', 'cockpit_organization_oeerank', 'cockpit_organization_operation_rate_rank', 'cockpit_organization_performance_rate_rank', 'cockpit_organization_yield_rate_rank', 'cockpit_thing_type_oeerank', 'cockpit_thing_type_operation_rate_rank', 'cockpit_thing_type_performance_rate_rank', 'cockpit_thing_type_yield_rate_rank', 'cockpit_thing_list', 'export_cockpit_thing_list', 'cockpit_target_list', 'cnc_overall', 'cnc_current_alerts', 'thing_rate_overall', 'thing_rate', 'cnc_alert_overall', 'cnc_alert_list', 'cnc_alerts', 'company_production', 'company_energy', 'company_overall', 'company_bottleneck', 'company_redundant', 'thing_input_record_summary_list', 'thing_input_record_list', 'bi_energy_device', 'bi_energy_operation_time', 'bi_energy_electric_quantity', 'bi_energy_fee', 'bi_macro_electric_quantity', 'bi_macro_peak_rate', 'form_struct', 'form_structs', 'filter_values', 'filter_relation_values', 'user_relation_filter_values', 'department_relation_filter_values', 'thing_overview', 'thing_summary', 'spare_part_summary', 'task_summary', 'export_thing_summary', 'export_spare_part_summary', 'export_task_summary', 'thing_repair', 'thing_repairs', 'export_thing_repairs', 'thing', 'thing_by_qr_code', 'things', 'export_things', 'things_template', 'spare_part_receipt', 'spare_part_receipts', 'export_spare_part_receipts', 'spare_part', 'spare_parts', 'export_spare_parts', 'spare_parts_template', 'thing_maintenance', 'thing_maintenances', 'export_thing_maintenances', 'thing_inspection_rule', 'thing_inspection_rules', 'export_thing_inspection_rules', 'thing_inspection', 'thing_inspections', 'export_thing_inspections', 'thing_group_tree', 'thing_group', 'thing_group_list', 'thing_group_users', 'thing_group_depts', 'dept_user_thing_groups', 'check_alter_department_thing_group', 'check_delete_department', 'spare_part_outbound', 'spare_part_outbounds', 'export_spare_part_outbounds', 'spare_part_stock', 'spare_part_stocks', 'export_spare_part_stock', 'eam_importation_record_list', 'export_eam_failed_importation_data', 'thing_maintenance_rule', 'thing_maintenance_rules', 'export_thing_maintenance_rules', 'fault', 'fault_list', 'fault_issue_summary', 'fault_issue', 'fault_issue_list', 'fault_reason_list', 'fault_rule', 'fault_rule_list', 'fault_solution', 'fault_solution_list', 'directory', 'bi_fdifault', 'thing_type', 'thing_types', 'thing_type_list', 'thing_type_code_list', 'thing_mechanism_model', 'source_key', 'source_key_list', 'source_model_key_list', 'adapter_key', 'adapter_key_list', 'adapter_model_key_list', 'cockpit_key', 'cockpit_key_list', 'cockpit_aggregation', 'cockpit_aggregations', 'thing_status', 'thing_statuses', 'energy_group', 'energy_group_list', 'energy_time_distribution', 'alert_rules', 'alert_config', 'alerts', 'export_alerts', 'bi_pdmalert', 'company_exists', 'company_type_list', 'provinces', 'cities', 'counties', 'company', 'companies', 'city_companies', 'type_companies', 'my_company', 'department_tree', 'department_list', 'department_name_same_as_siblings', 'company_bidatasource_list', 'company_bidatasource_tree', 'notifications', 'upload_config', 'upload_configs', 'role_list', 'permission_tree', 'role_exists', 'issues', 'export_issues', 'issue', 'market_solution_list', 'market_solution', 'market_solution_summary', 'account_exists', 'me', 'company_admin_users', 'platform_admin_users', 'users', 'platform_user_list', 'user', 'user_template', 'export_user', 'support_users', 'apps', 'company_apps', 'my_company_apps', 'my_app_list', 'quick_access_app', 'recent_app', 'app_config', 'workbench', 'workbench_card_field', 'workbench_card_option', 'system_log_list', 'system_log_action', 'market_app_list', 'market_app', 'market_app_summary', 'market_issue_list', 'market_issue', 'market_issue_summary', 'bi_issue_issue', 'ucc_form_structure', 'ucc_form_structure_json_schema', 'ucc_demo_form', 'ucc_demo_form_list')
+    __field_names__ = ('bi_file', 'bi_database_list', 'bi_test_database_uri', 'bi_private_data_source_list', 'bi_file_data_source_list', 'bi_dataset_list', 'bi_column_list', 'bi_excel_info', 'bi_explore', 'bi_category', 'bi_dashboard_list', 'bi_dashboard', 'bi_published_dashboard_list', 'bi_published_dashboard', 'recruit_job_overview', 'recruit_job_list', 'recruit_job', 'recruit_job_sign_record_list', 'recruit_student_list', 'recruit_student', 'recruit_student_overview', 'my_recruit_sign_status', 'company_recruit_brief', 'student_faculty', 'stu_no_exists', 'train_human_resource_list', 'train_work_type_list', 'train_work_level', 'check_work_type_exists', 'train_course_list', 'train_course', 'my_train_sign_course_record_list', 'train_sign_course_record_list', 'check_train_course_exists', 'train_course_round', 'export_chan_jiao_auth_template', 'social_person_list', 'social_person', 'social_person_account_summary', 'company_demand_overview_list', 'company_demand_list', 'company_demand', 'company_demand_summary', 'eprect_production_record', 'eprect_production_record_list', 'eprect_mold_list', 'current_date_data', 'current_shift_data', 'history_status_data', 'history_data', 'range_data', 'history_raw', 'multi_history_raw', 'real_raw', 'history_report', 'history_report_list', 'export_history_report', 'export_thing_energy_detail', 'export_thing_energy_detail_daily', 'real_report', 'total_report', 'thing_report_list', 'export_thing_report_list', 'fee_report_list', 'export_fee_report_list', 'thing_total_report_list', 'export_thing_total_report_list', 'energy_consumption_to_t', 'energy_consumption_trend', 'energy_power_trend', 'energy_consumption_comparison_by_group', 'energy_consumption_comparison_by_type', 'things_overall', 'things_peak_rate_rank', 'things_energy_consumption_rank', 'things_operation_rate_rank', 'things_power_on_rate_rank', 'things_energy_consumption_overall', 'things_energy_consumption_overall_sub', 'area_energy_consumption_overall', 'area_things_overall', 'area_energy_consumption', 'area_peak_power', 'area_production', 'area_redundants', 'area_bottlenecks', 'area_energy_per_product_rank', 'area_energy_consumption_rank', 'area_power_on_rate_rank', 'area_production_distribution', 'area_peak_rate_by_company', 'area_energy_consumption_by_company', 'area_redundant_by_company', 'area_bottleneck_by_company', 'area_production_by_company', 'export_area_production_by_company', 'export_area_redundant_by_company', 'export_area_bottleneck_by_company', 'export_area_peak_rate_by_company', 'export_area_energy_consumption_by_company', 'cockpit_overall', 'cockpit_rate_overall', 'cockpit_rate_list', 'export_cockpit_rate_list', 'cockpit_oee', 'export_cockpit_oee', 'cockpit_operation_rate', 'export_cockpit_operation_rate', 'cockpit_performance_rate', 'export_cockpit_performance_rate', 'cockpit_yield_rate', 'export_cockpit_yield_rate', 'cockpit_organization_oeerank', 'cockpit_organization_operation_rate_rank', 'cockpit_organization_performance_rate_rank', 'cockpit_organization_yield_rate_rank', 'cockpit_thing_type_oeerank', 'cockpit_thing_type_operation_rate_rank', 'cockpit_thing_type_performance_rate_rank', 'cockpit_thing_type_yield_rate_rank', 'cockpit_thing_list', 'export_cockpit_thing_list', 'cockpit_target_list', 'cnc_overall', 'cnc_current_alerts', 'thing_rate_overall', 'thing_rate', 'cnc_alert_overall', 'cnc_alert_list', 'cnc_alerts', 'company_production', 'company_energy', 'company_overall', 'company_bottleneck', 'company_redundant', 'thing_input_record_summary_list', 'thing_input_record_list', 'bi_energy_device', 'bi_energy_operation_time', 'bi_energy_electric_quantity', 'bi_energy_fee', 'bi_macro_electric_quantity', 'bi_macro_peak_rate', 'form_struct', 'form_structs', 'filter_values', 'filter_relation_values', 'user_relation_filter_values', 'department_relation_filter_values', 'thing_overview', 'thing_summary', 'spare_part_summary', 'task_summary', 'export_thing_summary', 'export_spare_part_summary', 'export_task_summary', 'thing_repair', 'thing_repairs', 'export_thing_repairs', 'thing', 'thing_by_qr_code', 'things', 'export_things', 'things_template', 'spare_part_receipt', 'spare_part_receipts', 'export_spare_part_receipts', 'spare_part', 'spare_parts', 'export_spare_parts', 'spare_parts_template', 'thing_maintenance', 'thing_maintenances', 'export_thing_maintenances', 'thing_inspection_rule', 'thing_inspection_rules', 'export_thing_inspection_rules', 'thing_inspection', 'thing_inspections', 'export_thing_inspections', 'thing_group_tree', 'thing_group', 'thing_group_list', 'thing_group_users', 'thing_group_depts', 'dept_user_thing_groups', 'check_alter_department_thing_group', 'check_delete_department', 'spare_part_outbound', 'spare_part_outbounds', 'export_spare_part_outbounds', 'spare_part_stock', 'spare_part_stocks', 'export_spare_part_stock', 'eam_importation_record_list', 'export_eam_failed_importation_data', 'thing_maintenance_rule', 'thing_maintenance_rules', 'export_thing_maintenance_rules', 'fault', 'fault_list', 'fault_issue_summary', 'fault_issue', 'fault_issue_list', 'fault_reason_list', 'fault_rule', 'fault_rule_list', 'fault_solution', 'fault_solution_list', 'directory', 'bi_fdifault', 'thing_type', 'thing_types', 'thing_type_list', 'thing_type_code_list', 'thing_mechanism_model', 'source_key', 'source_key_list', 'source_model_key_list', 'adapter_key', 'adapter_key_list', 'adapter_model_key_list', 'cockpit_key', 'cockpit_key_list', 'cockpit_aggregation', 'cockpit_aggregations', 'thing_status', 'thing_statuses', 'energy_group', 'energy_group_list', 'energy_time_distribution', 'alert_rules', 'alert_config', 'alerts', 'export_alerts', 'bi_pdmalert', 'company_exists', 'company_type_list', 'provinces', 'cities', 'counties', 'company', 'companies', 'city_companies', 'type_companies', 'my_company', 'department_tree', 'department_list', 'department_name_same_as_siblings', 'company_bidatasource_list', 'company_bidatasource_tree', 'notification_config_list', 'notification_config', 'notification_list', 'notification', 'notification_config_app', 'notification_app', 'upload_config', 'upload_configs', 'role_list', 'permission_tree', 'role_exists', 'issues', 'export_issues', 'issue', 'account_exists', 'me', 'company_admin_users', 'platform_admin_users', 'users', 'platform_user_list', 'user', 'user_template', 'export_user', 'support_users', 'app_users', 'market_solution_list', 'market_solution', 'market_solution_summary', 'apps', 'company_apps', 'my_company_apps', 'my_app_list', 'quick_access_app', 'recent_app', 'app_config', 'workbench', 'workbench_card_field', 'workbench_card_option', 'system_log_list', 'system_log_action', 'market_app_list', 'market_app', 'market_app_summary', 'market_issue_list', 'market_issue', 'market_issue_summary', 'bi_issue_issue', 'ucc_form_structure', 'ucc_form_structure_json_schema', 'ucc_demo_form', 'ucc_demo_form_list')
     bi_file = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(File)), graphql_name='biFile', args=sgqlc.types.ArgDict((
         ('id', sgqlc.types.Arg(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null(ID))), graphql_name='id', default=None)),
 ))
@@ -6691,7 +6760,7 @@ class Query(sgqlc.types.Type):
     city_companies = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(City)), graphql_name='cityCompanies')
     type_companies = sgqlc.types.Field(sgqlc.types.non_null('TypeCompaniesList'), graphql_name='typeCompanies', args=sgqlc.types.ArgDict((
         ('filter', sgqlc.types.Arg(CompanyFilter, graphql_name='filter', default=None)),
-        ('perm', sgqlc.types.Arg(String, graphql_name='perm', default=None)),
+        ('scenario', sgqlc.types.Arg(TypeCompaniesScenario, graphql_name='scenario', default=None)),
 ))
     )
     my_company = sgqlc.types.Field(sgqlc.types.non_null(Company), graphql_name='myCompany')
@@ -6717,7 +6786,30 @@ class Query(sgqlc.types.Type):
         ('filter', sgqlc.types.Arg(CompanyBIDatasourceFilter, graphql_name='filter', default=None)),
 ))
     )
-    notifications = sgqlc.types.Field(sgqlc.types.non_null(NotificationList), graphql_name='notifications')
+    notification_config_list = sgqlc.types.Field(sgqlc.types.non_null(NotificationConfigList), graphql_name='notificationConfigList', args=sgqlc.types.ArgDict((
+        ('offset', sgqlc.types.Arg(Int, graphql_name='offset', default=None)),
+        ('limit', sgqlc.types.Arg(Int, graphql_name='limit', default=None)),
+        ('order_by', sgqlc.types.Arg(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='orderBy', default=None)),
+        ('filter', sgqlc.types.Arg(NotificationConfigFilterInput, graphql_name='filter', default=None)),
+))
+    )
+    notification_config = sgqlc.types.Field(sgqlc.types.non_null(NotificationConfig), graphql_name='notificationConfig', args=sgqlc.types.ArgDict((
+        ('id', sgqlc.types.Arg(sgqlc.types.non_null(ID), graphql_name='id', default=None)),
+))
+    )
+    notification_list = sgqlc.types.Field(sgqlc.types.non_null(NotificationList), graphql_name='notificationList', args=sgqlc.types.ArgDict((
+        ('offset', sgqlc.types.Arg(Int, graphql_name='offset', default=None)),
+        ('limit', sgqlc.types.Arg(Int, graphql_name='limit', default=None)),
+        ('order_by', sgqlc.types.Arg(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='orderBy', default=None)),
+        ('filter', sgqlc.types.Arg(NotificationFilterInput, graphql_name='filter', default=None)),
+))
+    )
+    notification = sgqlc.types.Field(sgqlc.types.non_null(Notification), graphql_name='notification', args=sgqlc.types.ArgDict((
+        ('id', sgqlc.types.Arg(sgqlc.types.non_null(ID), graphql_name='id', default=None)),
+))
+    )
+    notification_config_app = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(App)), graphql_name='notificationConfigApp')
+    notification_app = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(App)), graphql_name='notificationApp')
     upload_config = sgqlc.types.Field('UploadConfig', graphql_name='uploadConfig', args=sgqlc.types.ArgDict((
         ('name', sgqlc.types.Arg(sgqlc.types.non_null(String), graphql_name='name', default=None)),
 ))
@@ -6763,18 +6855,6 @@ class Query(sgqlc.types.Type):
         ('id', sgqlc.types.Arg(ID, graphql_name='id', default=None)),
 ))
     )
-    market_solution_list = sgqlc.types.Field(sgqlc.types.non_null(MarketSolutionList), graphql_name='marketSolutionList', args=sgqlc.types.ArgDict((
-        ('offset', sgqlc.types.Arg(Int, graphql_name='offset', default=None)),
-        ('limit', sgqlc.types.Arg(Int, graphql_name='limit', default=None)),
-        ('order_by', sgqlc.types.Arg(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='orderBy', default=None)),
-        ('filter', sgqlc.types.Arg(MarketSolutionFilterInput, graphql_name='filter', default=None)),
-))
-    )
-    market_solution = sgqlc.types.Field(sgqlc.types.non_null(MarketSolution), graphql_name='marketSolution', args=sgqlc.types.ArgDict((
-        ('id', sgqlc.types.Arg(sgqlc.types.non_null(ID), graphql_name='id', default=None)),
-))
-    )
-    market_solution_summary = sgqlc.types.Field(sgqlc.types.non_null(MarketSolutionSummary), graphql_name='marketSolutionSummary')
     account_exists = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='accountExists', args=sgqlc.types.ArgDict((
         ('account', sgqlc.types.Arg(sgqlc.types.non_null(String), graphql_name='account', default=None)),
 ))
@@ -6815,6 +6895,25 @@ class Query(sgqlc.types.Type):
 ))
     )
     support_users = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null('User')), graphql_name='supportUsers')
+    app_users = sgqlc.types.Field(sgqlc.types.non_null('UserList'), graphql_name='appUsers', args=sgqlc.types.ArgDict((
+        ('offset', sgqlc.types.Arg(Int, graphql_name='offset', default=None)),
+        ('limit', sgqlc.types.Arg(Int, graphql_name='limit', default=None)),
+        ('filter', sgqlc.types.Arg(AppUserListFilter, graphql_name='filter', default=None)),
+        ('order_by', sgqlc.types.Arg(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='orderBy', default=None)),
+))
+    )
+    market_solution_list = sgqlc.types.Field(sgqlc.types.non_null(MarketSolutionList), graphql_name='marketSolutionList', args=sgqlc.types.ArgDict((
+        ('offset', sgqlc.types.Arg(Int, graphql_name='offset', default=None)),
+        ('limit', sgqlc.types.Arg(Int, graphql_name='limit', default=None)),
+        ('order_by', sgqlc.types.Arg(sgqlc.types.list_of(sgqlc.types.non_null(String)), graphql_name='orderBy', default=None)),
+        ('filter', sgqlc.types.Arg(MarketSolutionFilterInput, graphql_name='filter', default=None)),
+))
+    )
+    market_solution = sgqlc.types.Field(sgqlc.types.non_null(MarketSolution), graphql_name='marketSolution', args=sgqlc.types.ArgDict((
+        ('id', sgqlc.types.Arg(sgqlc.types.non_null(ID), graphql_name='id', default=None)),
+))
+    )
+    market_solution_summary = sgqlc.types.Field(sgqlc.types.non_null(MarketSolutionSummary), graphql_name='marketSolutionSummary')
     apps = sgqlc.types.Field(sgqlc.types.non_null(AppList), graphql_name='apps', args=sgqlc.types.ArgDict((
         ('offset', sgqlc.types.Arg(Int, graphql_name='offset', default=None)),
         ('limit', sgqlc.types.Arg(Int, graphql_name='limit', default=None)),

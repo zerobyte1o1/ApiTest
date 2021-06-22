@@ -81,4 +81,5 @@ class CompanyPermissionOperator:
 
 if __name__ == '__main__':
     tree_ = PermissionTree(admin).query_company_permissions(61)
+    print(tree_)
     print(tree_.select_deep("name", "平台").id)

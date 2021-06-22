@@ -32987,6 +32987,15 @@
             },
             {
               "args": [],
+              "name": "isMine",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "args": [],
               "name": "thingGroups",
               "type": {
                 "kind": "LIST",
@@ -49970,6 +49979,15 @@
                     "name": "CompanyFilter",
                     "ofType": null
                   }
+                },
+                {
+                  "defaultValue": null,
+                  "name": "perm",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 }
               ],
               "name": "typeCompanies",
@@ -56054,6 +56072,15 @@
                       "ofType": null
                     }
                   }
+                },
+                {
+                  "defaultValue": null,
+                  "name": "perm",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 }
               ],
               "name": "updateCompany",
@@ -57156,6 +57183,15 @@
                   "type": {
                     "kind": "INPUT_OBJECT",
                     "name": "ResetPasswordInput",
+                    "ofType": null
+                  }
+                },
+                {
+                  "defaultValue": null,
+                  "name": "perm",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   }
                 }

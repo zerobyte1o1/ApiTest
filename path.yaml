@@ -1,2 +1,3 @@
 schema_graphql: /Users/linhao/graphql/platform_only_eam/
-allure: usr/local/bin/allure-2.7.0/bin/
+allure: /usr/local/bin/allure-2.7.0/bin/
+

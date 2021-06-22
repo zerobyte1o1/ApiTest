@@ -4905,6 +4905,7 @@ class Mutation(sgqlc.types.Type):
     )
     update_company = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='updateCompany', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(sgqlc.types.non_null(UpdateCompanyInput), graphql_name='input', default=None)),
+        ('perm', sgqlc.types.Arg(String, graphql_name='perm', default=None)),
 ))
     )
     delete_companies = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='deleteCompanies', args=sgqlc.types.ArgDict((
@@ -5070,6 +5071,7 @@ class Mutation(sgqlc.types.Type):
     )
     reset_password = sgqlc.types.Field(sgqlc.types.non_null(sgqlc.types.list_of(sgqlc.types.non_null('User'))), graphql_name='resetPassword', args=sgqlc.types.ArgDict((
         ('input', sgqlc.types.Arg(ResetPasswordInput, graphql_name='input', default=None)),
+        ('perm', sgqlc.types.Arg(String, graphql_name='perm', default=None)),
 ))
     )
     restore_user = sgqlc.types.Field(sgqlc.types.non_null(Boolean), graphql_name='restoreUser', args=sgqlc.types.ArgDict((
@@ -6689,6 +6691,7 @@ class Query(sgqlc.types.Type):
     city_companies = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(City)), graphql_name='cityCompanies')
     type_companies = sgqlc.types.Field(sgqlc.types.non_null('TypeCompaniesList'), graphql_name='typeCompanies', args=sgqlc.types.ArgDict((
         ('filter', sgqlc.types.Arg(CompanyFilter, graphql_name='filter', default=None)),
+        ('perm', sgqlc.types.Arg(String, graphql_name='perm', default=None)),
 ))
     )
     my_company = sgqlc.types.Field(sgqlc.types.non_null(Company), graphql_name='myCompany')
@@ -8020,7 +8023,7 @@ class UploadConfig(sgqlc.types.Type):
 
 class User(sgqlc.types.Type):
     __schema__ = platform_schema
-    __field_names__ = ('id', 'account', 'name', 'company', 'department', 'password', 'nickname', 'phone', 'email', 'avatar', 'desc', 'type', 'counties', 'role', 'is_active', 'create_time', 'update_time', 'origin', 'thing_groups')
+    __field_names__ = ('id', 'account', 'name', 'company', 'department', 'password', 'nickname', 'phone', 'email', 'avatar', 'desc', 'type', 'counties', 'role', 'is_active', 'create_time', 'update_time', 'origin', 'is_mine', 'thing_groups')
     id = sgqlc.types.Field(sgqlc.types.non_null(ID), graphql_name='id')
     account = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='account')
     name = sgqlc.types.Field(sgqlc.types.non_null(String), graphql_name='name')
@@ -8039,6 +8042,7 @@ class User(sgqlc.types.Type):
     create_time = sgqlc.types.Field(sgqlc.types.non_null(Timestamp), graphql_name='createTime')
     update_time = sgqlc.types.Field(Timestamp, graphql_name='updateTime')
     origin = sgqlc.types.Field(UserOrigin, graphql_name='origin')
+    is_mine = sgqlc.types.Field(Boolean, graphql_name='isMine')
     thing_groups = sgqlc.types.Field(sgqlc.types.list_of(sgqlc.types.non_null(ThingGroup)), graphql_name='thingGroups')
 
 
